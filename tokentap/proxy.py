@@ -9,8 +9,8 @@ from typing import Callable
 import aiohttp
 from aiohttp import web
 
-from sherlock.config import DEFAULT_PROXY_PORT, PROVIDERS
-from sherlock.parser import count_tokens, parse_anthropic_request
+from tokentap.config import DEFAULT_PROXY_PORT, PROVIDERS
+from tokentap.parser import count_tokens, parse_anthropic_request
 
 
 class ProxyServer:

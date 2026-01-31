@@ -10,10 +10,10 @@ from rich.progress import BarColumn, Progress, TextColumn
 from rich.table import Table
 from rich.text import Text
 
-from sherlock.config import MAX_LOG_ENTRIES, PROMPT_PREVIEW_LENGTH
+from tokentap.config import MAX_LOG_ENTRIES, PROMPT_PREVIEW_LENGTH
 
 
-class SherlockDashboard:
+class TokenTapDashboard:
     """Terminal dashboard for displaying intercepted LLM traffic."""
 
     def __init__(self, token_limit: int = 200_000):
@@ -58,7 +58,7 @@ class SherlockDashboard:
     def _make_header(self) -> Panel:
         """Create the header panel."""
         title = Text()
-        title.append("SHERLOCK", style="bold cyan")
+        title.append("TOKENTAP", style="bold cyan")
         title.append(" - LLM Traffic Inspector", style="dim")
         return Panel(title, style="cyan", height=3)
 

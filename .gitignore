@@ -18,20 +18,11 @@ ENV/
 env/
 
 # IDE
-.idea/
 .vscode/
+.idea/
 *.swp
 *.swo
 *~
-
-# mitmproxy
-.mitmproxy/
-
-# Sherlock output (prompt logs in project root from testing)
-*.anthropic.json
-*.anthropic.md
-*_anthropic.json
-*_anthropic.md
 
 # OS
 .DS_Store

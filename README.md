@@ -1,5 +1,5 @@
 <p align="center">
-  <h1 align="center">Sherlock</h1>
+  <h1 align="center">tokentap</h1>
   <p align="center">
     <strong>Token Tracker for LLM CLI Tools</strong>
   </p>
@@ -22,9 +22,9 @@
 
 ---
 
-Sherlock tracks token usage for LLM CLI tools with a live terminal dashboard. See exactly how many tokens you're using in real-time.
+tokentap tracks token usage for LLM CLI tools with a live terminal dashboard. See exactly how many tokens you're using in real-time.
 
-## Why Sherlock?
+## Why tokentap?
 
 - **Track Token Usage**: See exactly how many tokens each request consumes
 - **Monitor Context Windows**: Visual fuel gauge shows cumulative usage against your limit
@@ -34,8 +34,14 @@ Sherlock tracks token usage for LLM CLI tools with a live terminal dashboard. Se
 ## Installation
 
 ```bash
-git clone https://github.com/jmuncor/sherlock.git
-cd sherlock
+pip install tokentap
+```
+
+Or install from source:
+
+```bash
+git clone https://github.com/jmuncor/tokentap.git
+cd tokentap
 pip install -e .
 ```
 
@@ -48,14 +54,14 @@ pip install -e .
 ### Terminal 1: Start the Dashboard
 
 ```bash
-sherlock start
+tokentap start
 ```
 
 You'll be prompted to choose where to save captured prompts, then the dashboard appears:
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│  SHERLOCK - LLM Traffic Inspector                           │
+│  TOKENTAP - LLM Traffic Inspector                           │
 ├─────────────────────────────────────────────────────────────┤
 │  Context Usage  ████████████░░░░░░░░░░░░░░░░  42%           │
 │                 (84,231 / 200,000 tokens)                   │
@@ -73,13 +79,13 @@ You'll be prompted to choose where to save captured prompts, then the dashboard 
 
 ```bash
 # For Claude Code
-sherlock claude
+tokentap claude
 
 # For Gemini CLI (see known issues)
-sherlock gemini
+tokentap gemini
 
 # For OpenAI Codex
-sherlock codex
+tokentap codex
 ```
 
 That's it! Watch the dashboard update in real-time as you work.
@@ -111,16 +117,16 @@ Session complete. Total: 84,231 tokens across 12 requests.
 
 | Command | Description |
 |---------|-------------|
-| `sherlock start` | Start the proxy and dashboard |
-| `sherlock claude` | Run Claude Code with proxy configured |
-| `sherlock gemini` | Run Gemini CLI with proxy configured |
-| `sherlock codex` | Run OpenAI Codex CLI with proxy configured |
-| `sherlock run --provider <name> <cmd>` | Run any command with proxy configured |
+| `tokentap start` | Start the proxy and dashboard |
+| `tokentap claude` | Run Claude Code with proxy configured |
+| `tokentap gemini` | Run Gemini CLI with proxy configured |
+| `tokentap codex` | Run OpenAI Codex CLI with proxy configured |
+| `tokentap run --provider <name> <cmd>` | Run any command with proxy configured |
 
 ### Options
 
 ```bash
-sherlock start [OPTIONS]
+tokentap start [OPTIONS]
 
 Options:
   -p, --port NUM    Proxy port (default: 8080)
@@ -128,7 +134,7 @@ Options:
 ```
 
 ```bash
-sherlock claude [OPTIONS] [ARGS]...
+tokentap claude [OPTIONS] [ARGS]...
 
 Options:
   -p, --port NUM    Proxy port (default: 8080)
@@ -138,7 +144,7 @@ Options:
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│  Terminal 1: sherlock start                                      │
+│  Terminal 1: tokentap start                                      │
 │  ┌─────────────────────────────────────────────────────────────┐│
 │  │  HTTP Proxy (localhost:8080)                                ││
 │  │  + Dashboard                                                ││
@@ -148,7 +154,7 @@ Options:
                                 │ HTTP
                                 │
 ┌───────────────────────────────┴─────────────────────────────────┐
-│  Terminal 2: sherlock claude                                     │
+│  Terminal 2: tokentap claude                                     │
 │  ┌─────────────────────────────────────────────────────────────┐│
 │  │  Sets ANTHROPIC_BASE_URL=http://localhost:8080              ││
 │  │  Runs: claude                                               ││
@@ -166,15 +172,15 @@ Options:
 
 | Provider | Command | Status |
 |----------|---------|--------|
-| Anthropic (Claude Code) | `sherlock claude` | Supported |
-| Google (Gemini CLI) | `sherlock gemini` | Blocked by upstream issue |
-| OpenAI (Codex) | `sherlock codex` | Supported |
+| Anthropic (Claude Code) | `tokentap claude` | Supported |
+| Google (Gemini CLI) | `tokentap gemini` | Blocked by upstream issue |
+| OpenAI (Codex) | `tokentap codex` | Supported |
 
 ## Known Issues
 
 ### Gemini CLI
 
-Gemini CLI currently has a [known issue](https://github.com/google-gemini/gemini-cli/issues/15430) where it ignores custom base URLs when using OAuth authentication. Sherlock's Gemini support will work automatically once the Gemini CLI team fixes this issue.
+Gemini CLI currently has a [known issue](https://github.com/google-gemini/gemini-cli/issues/15430) where it ignores custom base URLs when using OAuth authentication. tokentap's Gemini support will work automatically once the Gemini CLI team fixes this issue.
 
 ## Contributing
 
@@ -189,8 +195,8 @@ Contributions are welcome! Here's how you can help:
 ### Development Setup
 
 ```bash
-git clone https://github.com/jmuncor/sherlock.git
-cd sherlock
+git clone https://github.com/jmuncor/tokentap.git
+cd tokentap
 python -m venv venv
 source venv/bin/activate
 pip install -e .
@@ -204,4 +210,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 <p align="center">
   <em>See what's really being sent to the LLM. Track. Learn. Optimize.</em>
+</p>
+<p align="center">
+  <a href="https://tokentap.ai">tokentap.ai</a>
 </p>

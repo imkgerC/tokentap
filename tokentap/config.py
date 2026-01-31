@@ -1,4 +1,4 @@
-"""Configuration constants for Sherlock."""
+"""Configuration constants for tokentap."""
 
 from pathlib import Path
 
@@ -36,12 +36,12 @@ DEFAULT_TOKEN_LIMIT = 200_000
 DEFAULT_PROXY_PORT = 8080
 
 # Data directories
-SHERLOCK_DIR = Path.home() / ".sherlock"
-HISTORY_FILE = SHERLOCK_DIR / "history.json"
-PROMPTS_DIR = SHERLOCK_DIR / "prompts"
+TOKENTAP_DIR = Path.home() / ".tokentap"
+HISTORY_FILE = TOKENTAP_DIR / "history.json"
+PROMPTS_DIR = TOKENTAP_DIR / "prompts"
 
 # IPC file for communication between interceptor and dashboard
-IPC_FILENAME = "sherlock_ipc.jsonl"
+IPC_FILENAME = "tokentap_ipc.jsonl"
 
 # Dashboard settings
 PROMPT_PREVIEW_LENGTH = 200

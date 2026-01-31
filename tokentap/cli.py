@@ -1,4 +1,4 @@
-"""CLI interface for Sherlock."""
+"""CLI interface for tokentap."""
 
 import asyncio
 import json
@@ -12,9 +12,9 @@ from pathlib import Path
 import click
 from rich.console import Console
 
-from sherlock.config import DEFAULT_PROXY_PORT, DEFAULT_TOKEN_LIMIT, PROVIDERS, PROMPTS_DIR, SHERLOCK_DIR
-from sherlock.dashboard import SherlockDashboard
-from sherlock.proxy import ProxyServer
+from tokentap.config import DEFAULT_PROXY_PORT, DEFAULT_TOKEN_LIMIT, PROVIDERS, PROMPTS_DIR, TOKENTAP_DIR
+from tokentap.dashboard import TokenTapDashboard
+from tokentap.proxy import ProxyServer
 
 console = Console()
 
@@ -71,18 +71,17 @@ def get_prompts_dir_interactive() -> Path:
 @click.group(invoke_without_command=True)
 @click.pass_context
 def main(ctx):
-    """Sherlock - LLM API traffic interceptor and token tracker.
+    """tokentap - LLM API traffic interceptor and token tracker.
 
     Start the dashboard in one terminal:
 
-        sherlock start
+        tokentap start
 
     Then run your LLM tool in another terminal:
 
-        sherlock claude
-        sherlock happy
-        sherlock gemini
-        sherlock codex
+        tokentap claude
+        tokentap gemini
+        tokentap codex
     """
     if ctx.invoked_subcommand is None:
         click.echo(ctx.get_help())
@@ -94,7 +93,7 @@ def main(ctx):
 def start(port: int, limit: int):
     """Start the proxy and dashboard.
 
-    Run this in one terminal, then use 'sherlock claude' (or gemini/codex)
+    Run this in one terminal, then use 'tokentap claude' (or gemini/codex)
     in another terminal.
     """
     # Ask for prompts directory
@@ -102,7 +101,7 @@ def start(port: int, limit: int):
     prompts_dir.mkdir(parents=True, exist_ok=True)
 
     # Create dashboard
-    dashboard = SherlockDashboard(token_limit=limit)
+    dashboard = TokenTapDashboard(token_limit=limit)
 
     # Event queue for thread-safe communication
     event_queue = []
@@ -144,10 +143,9 @@ def start(port: int, limit: int):
     console.print(f"[green]Saving prompts to {prompts_dir}[/green]")
     console.print()
     console.print("[yellow]In another terminal, run:[/yellow]")
-    console.print(f"  [cyan]sherlock claude[/cyan]")
-    console.print(f"  [cyan]sherlock happy[/cyan]")
-    console.print(f"  [cyan]sherlock gemini[/cyan]")
-    console.print(f"  [cyan]sherlock codex[/cyan]")
+    console.print(f"  [cyan]tokentap claude[/cyan]")
+    console.print(f"  [cyan]tokentap gemini[/cyan]")
+    console.print(f"  [cyan]tokentap codex[/cyan]")
     console.print()
     console.print("[dim]Starting dashboard...[/dim]")
 
@@ -171,27 +169,11 @@ def start(port: int, limit: int):
 def claude(port: int, args: tuple):
     """Run Claude Code with proxy configured.
 
-    Start 'sherlock start' in another terminal first.
+    Start 'tokentap start' in another terminal first.
 
-    Example: sherlock claude
+    Example: tokentap claude
     """
     _run_tool("anthropic", "claude", port, args)
-
-
-@main.command()
-@click.option("--port", "-p", default=DEFAULT_PROXY_PORT, help="Proxy port number")
-@click.argument("args", nargs=-1)
-def happy(port: int, args: tuple):
-    """Run Happy (Claude frontend for remote monitoring) with proxy configured.
-
-    Happy is a frontend for Claude that enables remote monitoring.
-    See: https://github.com/slopus/happy
-
-    Start 'sherlock start' in another terminal first.
-
-    Example: sherlock happy
-    """
-    _run_tool("anthropic", "happy", port, args)
 
 
 @main.command()
@@ -200,9 +182,9 @@ def happy(port: int, args: tuple):
 def gemini(port: int, args: tuple):
     """Run Gemini CLI with proxy configured.
 
-    Start 'sherlock start' in another terminal first.
+    Start 'tokentap start' in another terminal first.
 
-    Example: sherlock gemini
+    Example: tokentap gemini
     """
     _run_tool("gemini", "gemini", port, args)
 
@@ -213,9 +195,9 @@ def gemini(port: int, args: tuple):
 def codex(port: int, args: tuple):
     """Run OpenAI Codex CLI with proxy configured.
 
-    Start 'sherlock start' in another terminal first.
+    Start 'tokentap start' in another terminal first.
 
-    Example: sherlock codex
+    Example: tokentap codex
     """
     _run_tool("openai", "codex", port, args)
 
@@ -228,9 +210,9 @@ def codex(port: int, args: tuple):
 def run(port: int, provider: str, command: str, args: tuple):
     """Run any command with proxy configured.
 
-    Start 'sherlock start' in another terminal first.
+    Start 'tokentap start' in another terminal first.
 
-    Example: sherlock run --provider anthropic my-custom-tool
+    Example: tokentap run --provider anthropic my-custom-tool
     """
     _run_tool(provider, command, port, args)
 
