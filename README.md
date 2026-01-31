@@ -24,8 +24,6 @@
 
 tokentap tracks token usage for LLM CLI tools with a live terminal dashboard. See exactly how many tokens you're using in real-time.
 
-> **Note:** This project was formerly known as "sherlock".
-
 ## Why tokentap?
 
 - **Track Token Usage**: See exactly how many tokens each request consumes
