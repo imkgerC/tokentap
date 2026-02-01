@@ -34,7 +34,7 @@ tokentap tracks token usage for LLM CLI tools with a live terminal dashboard. Se
 ## Installation
 
 ```bash
-pip install tokentap (We are working on this one)
+pip install tokentap
 ```
 
 Or install from source:
