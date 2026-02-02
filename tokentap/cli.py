@@ -163,9 +163,9 @@ def start(port: int, limit: int):
         console.print(f"[cyan]Session complete. Total: {dashboard.total_tokens:,} tokens across {len(dashboard.requests)} requests.[/cyan]")
 
 
-@main.command()
+@main.command(context_settings={"ignore_unknown_options": True, "allow_extra_args": True})
 @click.option("--port", "-p", default=DEFAULT_PROXY_PORT, help="Proxy port number")
-@click.argument("args", nargs=-1)
+@click.argument("args", nargs=-1, type=click.UNPROCESSED)
 def claude(port: int, args: tuple):
     """Run Claude Code with proxy configured.
 
@@ -176,9 +176,9 @@ def claude(port: int, args: tuple):
     _run_tool("anthropic", "claude", port, args)
 
 
-@main.command()
+@main.command(context_settings={"ignore_unknown_options": True, "allow_extra_args": True})
 @click.option("--port", "-p", default=DEFAULT_PROXY_PORT, help="Proxy port number")
-@click.argument("args", nargs=-1)
+@click.argument("args", nargs=-1, type=click.UNPROCESSED)
 def gemini(port: int, args: tuple):
     """Run Gemini CLI with proxy configured.
 
@@ -189,9 +189,9 @@ def gemini(port: int, args: tuple):
     _run_tool("gemini", "gemini", port, args)
 
 
-@main.command()
+@main.command(context_settings={"ignore_unknown_options": True, "allow_extra_args": True})
 @click.option("--port", "-p", default=DEFAULT_PROXY_PORT, help="Proxy port number")
-@click.argument("args", nargs=-1)
+@click.argument("args", nargs=-1, type=click.UNPROCESSED)
 def codex(port: int, args: tuple):
     """Run OpenAI Codex CLI with proxy configured.
 
@@ -202,17 +202,17 @@ def codex(port: int, args: tuple):
     _run_tool("openai", "codex", port, args)
 
 
-@main.command()
+@main.command(context_settings={"ignore_unknown_options": True, "allow_extra_args": True})
 @click.option("--port", "-p", default=DEFAULT_PROXY_PORT, help="Proxy port number")
 @click.option("--provider", "-P", required=True, type=click.Choice(list(PROVIDERS.keys())), help="LLM provider")
 @click.argument("command")
-@click.argument("args", nargs=-1)
+@click.argument("args", nargs=-1, type=click.UNPROCESSED)
 def run(port: int, provider: str, command: str, args: tuple):
     """Run any command with proxy configured.
 
     Start 'tokentap start' in another terminal first.
 
-    Example: tokentap run --provider anthropic my-custom-tool
+    Example: tokentap run --provider anthropic my-custom-tool --some-flag
     """
     _run_tool(provider, command, port, args)
 
