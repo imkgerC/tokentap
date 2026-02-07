@@ -67,19 +67,15 @@ class ProxyServer:
                     data=body,
                     ssl=ssl_context,
                 ) as upstream_response:
-                    response_body = await upstream_response.read()
+                    resp = web.StreamResponse(status=upstream_response.status)
+                    for k, v in upstream_response.headers.items():
+                        resp.headers[k] = v
+                    await resp.prepare(request)
 
-                    # Build response headers
-                    response_headers = dict(upstream_response.headers)
-                    response_headers.pop("Content-Encoding", None)
-                    response_headers.pop("Transfer-Encoding", None)
-                    response_headers.pop("Content-Length", None)
-
-                    return web.Response(
-                        status=upstream_response.status,
-                        headers=response_headers,
-                        body=response_body,
-                    )
+                    async for chunk in upstream_response.content.iter_chunked(1024):
+                        await resp.write(chunk)
+                    await resp.write_eof()
+                    return resp
         except aiohttp.ClientError as e:
             return web.Response(
                 status=502,
