@@ -16,40 +16,6 @@ from tokentap.proxy import ProxyServer
 console = Console()
 
 
-def save_prompt_to_file(event: dict, prompts_dir: Path) -> None:
-    """Save a prompt to markdown and raw JSON files."""
-    prompts_dir.mkdir(parents=True, exist_ok=True)
-
-    timestamp = datetime.fromisoformat(event["timestamp"])
-    base_filename = timestamp.strftime(f"%Y-%m-%d_%H-%M-%S_{event['provider']}")
-
-    # Save markdown file (human-readable)
-    md_filepath = prompts_dir / f"{base_filename}.md"
-    lines = [
-        f"# Prompt - {timestamp.strftime('%Y-%m-%d %H:%M:%S')}",
-        f"**Provider:** {event['provider'].capitalize()}",
-        f"**Model:** {event['model']}",
-        f"**Tokens:** {event['tokens']:,}",
-        "",
-        "## Messages",
-    ]
-
-    for msg in event.get("messages", []):
-        role = msg.get("role", "unknown").capitalize()
-        content = msg.get("content", "")
-        lines.append(f"### {role}")
-        lines.append(content)
-        lines.append("")
-
-    md_filepath.write_text("\n".join(lines))
-
-    # Save raw JSON file (original request body)
-    raw_body = event.get("raw_body")
-    if raw_body is not None:
-        json_filepath = prompts_dir / f"{base_filename}.json"
-        json_filepath.write_text(json.dumps(raw_body, indent=2))
-
-
 def get_prompts_dir_interactive() -> Path:
     """Prompt user for prompts directory."""
     console.print(f"[cyan]Directory to save prompts (press Enter for default):[/cyan]")
@@ -81,7 +47,8 @@ def get_upstream_host_interactive() -> Path:
 @click.command()
 @click.option("--port", "-p", default=DEFAULT_PROXY_PORT, help="Proxy port number")
 @click.option("--limit", "-l", default=DEFAULT_TOKEN_LIMIT, help="Token limit for fuel gauge")
-def main(port: int, limit: int):
+@click.option("--no-dashboard", "-n", is_flag=True, help="Do not start dashboard")
+def main(port: int, limit: int, no_dashboard: bool):
     """Start the proxy and dashboard.
     """
 
@@ -92,7 +59,10 @@ def main(port: int, limit: int):
     prompts_dir.mkdir(parents=True, exist_ok=True)
 
     # Create dashboard
-    dashboard = TokenTapDashboard(token_limit=limit)
+    dashboard = TokenTapDashboard(
+        port=port,
+        token_limit=limit
+    )
 
     # Event queue for thread-safe communication
     event_queue = []
@@ -100,8 +70,6 @@ def main(port: int, limit: int):
 
     def on_request(event: dict) -> None:
         """Handle incoming request event."""
-        # Save prompt to file
-        save_prompt_to_file(event, prompts_dir)
         # Queue event for dashboard
         with event_lock:
             event_queue.append(event)
@@ -117,7 +85,8 @@ def main(port: int, limit: int):
     proxy = ProxyServer(
         base_url=base_url,
         port=port,
-        on_request=on_request
+        on_request=on_request,
+        prompts_dir=prompts_dir,
     )
 
     loop = asyncio.new_event_loop()
@@ -137,14 +106,20 @@ def main(port: int, limit: int):
     console.print(f"[green]Proxy running on http://127.0.0.1:{port}[/green]")
     console.print(f"[green]Saving prompts to {prompts_dir}[/green]")
     console.print()
-    console.print("[dim]Starting dashboard...[/dim]")
+    if not no_dashboard:
+        console.print("[dim]Starting dashboard...[/dim]")
 
     import time
     time.sleep(1)
 
     # Run dashboard
     try:
-        dashboard.run(poll_events)
+        if no_dashboard:
+            while True:
+                poll_events()
+                time.sleep(0.1)
+        else:
+            dashboard.run(poll_events)
     except KeyboardInterrupt:
         pass
     finally:

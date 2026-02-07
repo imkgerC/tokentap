@@ -16,8 +16,9 @@ from tokentap.config import MAX_LOG_ENTRIES, PROMPT_PREVIEW_LENGTH
 class TokenTapDashboard:
     """Terminal dashboard for displaying intercepted LLM traffic."""
 
-    def __init__(self, token_limit: int = 200_000):
+    def __init__(self, port: int, token_limit: int):
         self.console = Console()
+        self.port = port
         self.token_limit = token_limit
         self.total_tokens = 0
         self.requests: list[dict] = []
@@ -59,7 +60,7 @@ class TokenTapDashboard:
         """Create the header panel."""
         title = Text()
         title.append("TOKENTAP", style="bold cyan")
-        title.append(" - LLM Traffic Inspector", style="dim")
+        title.append(f" - LLM Traffic Inspector (http://127.0.0.1:{self.port})", style="dim")
         return Panel(title, style="cyan", height=3)
 
     def _make_fuel_gauge(self) -> Panel:

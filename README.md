@@ -1,7 +1,12 @@
 
 # This is a fork
 
-I adapted tokentap to be able to inspect prompts send to a local model instead of the original frontier model providers.
+I adapted tokentap to my needs. Changes:
+- removed features not needed for me to simplify
+  - commercial provider integration
+  - `start` command that sets URLs
+- added support for custom providers, e.g. local models
+- implemented streaming responses
 
 ---
 
