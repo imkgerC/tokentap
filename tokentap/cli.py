@@ -2,9 +2,6 @@
 
 import asyncio
 import json
-import os
-import subprocess
-import sys
 import threading
 from datetime import datetime
 from pathlib import Path
@@ -12,7 +9,7 @@ from pathlib import Path
 import click
 from rich.console import Console
 
-from tokentap.config import DEFAULT_PROXY_PORT, DEFAULT_TOKEN_LIMIT, PROVIDERS, PROMPTS_DIR, TOKENTAP_DIR
+from tokentap.config import DEFAULT_PROXY_PORT, DEFAULT_TOKEN_LIMIT, DEFAULT_PROMPTS_DIR, DEFAULT_UPSTREAM_HOST
 from tokentap.dashboard import TokenTapDashboard
 from tokentap.proxy import ProxyServer
 
@@ -56,47 +53,41 @@ def save_prompt_to_file(event: dict, prompts_dir: Path) -> None:
 def get_prompts_dir_interactive() -> Path:
     """Prompt user for prompts directory."""
     console.print(f"[cyan]Directory to save prompts (press Enter for default):[/cyan]")
-    console.print(f"[dim]Default: {PROMPTS_DIR}[/dim]")
+    console.print(f"[dim]Default: {DEFAULT_PROMPTS_DIR}[/dim]")
 
     try:
         user_input = input("> ").strip()
-    except (EOFError, KeyboardInterrupt):
+    except EOFError:
         user_input = ""
 
     if user_input:
         return Path(user_input).expanduser().resolve()
-    return PROMPTS_DIR
+    return DEFAULT_PROMPTS_DIR
 
+def get_upstream_host_interactive() -> Path:
+    """Prompt user for upstream host."""
+    console.print(f"[cyan]Host to proxy (press Enter for default):[/cyan]")
+    console.print(f"[dim]Default: {DEFAULT_UPSTREAM_HOST}[/dim]")
 
-@click.group(invoke_without_command=True)
-@click.pass_context
-def main(ctx):
-    """tokentap - LLM API traffic interceptor and token tracker.
+    try:
+        user_input = input("> ").strip()
+    except EOFError:
+        user_input = ""
 
-    Start the dashboard in one terminal:
+    if user_input:
+        return user_input
+    return DEFAULT_UPSTREAM_HOST
 
-        tokentap start
-
-    Then run your LLM tool in another terminal:
-
-        tokentap claude
-        tokentap gemini
-        tokentap codex
-    """
-    if ctx.invoked_subcommand is None:
-        click.echo(ctx.get_help())
-
-
-@main.command()
+@click.command()
 @click.option("--port", "-p", default=DEFAULT_PROXY_PORT, help="Proxy port number")
 @click.option("--limit", "-l", default=DEFAULT_TOKEN_LIMIT, help="Token limit for fuel gauge")
-def start(port: int, limit: int):
+def main(port: int, limit: int):
     """Start the proxy and dashboard.
-
-    Run this in one terminal, then use 'tokentap claude' (or gemini/codex)
-    in another terminal.
     """
-    # Ask for prompts directory
+
+    print(Path(".").resolve())
+    base_url = get_upstream_host_interactive()
+    
     prompts_dir = get_prompts_dir_interactive()
     prompts_dir.mkdir(parents=True, exist_ok=True)
 
@@ -123,7 +114,11 @@ def start(port: int, limit: int):
         return events
 
     # Create and start proxy
-    proxy = ProxyServer(port=port, on_request=on_request)
+    proxy = ProxyServer(
+        base_url=base_url,
+        port=port,
+        on_request=on_request
+    )
 
     loop = asyncio.new_event_loop()
 
@@ -142,11 +137,6 @@ def start(port: int, limit: int):
     console.print(f"[green]Proxy running on http://127.0.0.1:{port}[/green]")
     console.print(f"[green]Saving prompts to {prompts_dir}[/green]")
     console.print()
-    console.print("[yellow]In another terminal, run:[/yellow]")
-    console.print(f"  [cyan]tokentap claude[/cyan]")
-    console.print(f"  [cyan]tokentap gemini[/cyan]")
-    console.print(f"  [cyan]tokentap codex[/cyan]")
-    console.print()
     console.print("[dim]Starting dashboard...[/dim]")
 
     import time
@@ -161,85 +151,6 @@ def start(port: int, limit: int):
         loop.call_soon_threadsafe(loop.stop)
         console.print()
         console.print(f"[cyan]Session complete. Total: {dashboard.total_tokens:,} tokens across {len(dashboard.requests)} requests.[/cyan]")
-
-
-@main.command(context_settings={"ignore_unknown_options": True, "allow_extra_args": True})
-@click.option("--port", "-p", default=DEFAULT_PROXY_PORT, help="Proxy port number")
-@click.argument("args", nargs=-1, type=click.UNPROCESSED)
-def claude(port: int, args: tuple):
-    """Run Claude Code with proxy configured.
-
-    Start 'tokentap start' in another terminal first.
-
-    Example: tokentap claude
-    """
-    _run_tool("anthropic", "claude", port, args)
-
-
-@main.command(context_settings={"ignore_unknown_options": True, "allow_extra_args": True})
-@click.option("--port", "-p", default=DEFAULT_PROXY_PORT, help="Proxy port number")
-@click.argument("args", nargs=-1, type=click.UNPROCESSED)
-def gemini(port: int, args: tuple):
-    """Run Gemini CLI with proxy configured.
-
-    Start 'tokentap start' in another terminal first.
-
-    Example: tokentap gemini
-    """
-    _run_tool("gemini", "gemini", port, args)
-
-
-@main.command(context_settings={"ignore_unknown_options": True, "allow_extra_args": True})
-@click.option("--port", "-p", default=DEFAULT_PROXY_PORT, help="Proxy port number")
-@click.argument("args", nargs=-1, type=click.UNPROCESSED)
-def codex(port: int, args: tuple):
-    """Run OpenAI Codex CLI with proxy configured.
-
-    Start 'tokentap start' in another terminal first.
-
-    Example: tokentap codex
-    """
-    _run_tool("openai", "codex", port, args)
-
-
-@main.command(context_settings={"ignore_unknown_options": True, "allow_extra_args": True})
-@click.option("--port", "-p", default=DEFAULT_PROXY_PORT, help="Proxy port number")
-@click.option("--provider", "-P", required=True, type=click.Choice(list(PROVIDERS.keys())), help="LLM provider")
-@click.argument("command")
-@click.argument("args", nargs=-1, type=click.UNPROCESSED)
-def run(port: int, provider: str, command: str, args: tuple):
-    """Run any command with proxy configured.
-
-    Start 'tokentap start' in another terminal first.
-
-    Example: tokentap run --provider anthropic my-custom-tool --some-flag
-    """
-    _run_tool(provider, command, port, args)
-
-
-def _run_tool(provider: str, command: str, port: int, args: tuple) -> None:
-    """Run a tool with the proxy environment variable set."""
-    provider_config = PROVIDERS.get(provider)
-    if not provider_config:
-        console.print(f"[red]Unknown provider: {provider}[/red]")
-        sys.exit(1)
-
-    env = os.environ.copy()
-    proxy_url = f"http://127.0.0.1:{port}"
-
-    # Set all environment variables for this provider
-    for env_var in provider_config["env_vars"]:
-        env[env_var] = proxy_url
-
-    cmd = [command] + list(args)
-    try:
-        result = subprocess.run(cmd, env=env)
-        sys.exit(result.returncode)
-    except FileNotFoundError:
-        console.print(f"[red]Error: '{command}' not found. Make sure it's installed and in your PATH.[/red]")
-        sys.exit(1)
-    except KeyboardInterrupt:
-        sys.exit(0)
 
 
 if __name__ == "__main__":

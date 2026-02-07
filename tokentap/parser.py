@@ -52,7 +52,6 @@ def parse_anthropic_request(body: dict) -> dict:
         - total_text: concatenated text for token counting
     """
     result = {
-        "provider": "anthropic",
         "messages": [],
         "model": body.get("model", "unknown"),
         "system": None,
@@ -80,6 +79,33 @@ def parse_anthropic_request(body: dict) -> dict:
     result["total_text"] = "\n".join(texts)
     return result
 
+def parse_openai_request(body: dict) -> dict:
+        """Parse OpenAI API request body."""
+        result = {
+            "messages": [],
+            "model": body.get("model", "unknown"),
+            "total_text": "",
+        }
+
+        texts = []
+        messages = body.get("messages", [])
+        for msg in messages:
+            role = msg.get("role", "unknown")
+            content = msg.get("content", "")
+            if isinstance(content, str):
+                result["messages"].append({"role": role, "content": content})
+                texts.append(content)
+            elif isinstance(content, list):
+                # Handle multimodal content
+                text_parts = [
+                    p.get("text", "") for p in content if p.get("type") == "text"
+                ]
+                combined = " ".join(text_parts)
+                result["messages"].append({"role": role, "content": combined})
+                texts.append(combined)
+
+        result["total_text"] = "\n".join(texts)
+        return result
 
 def parse_request(host: str, body: bytes) -> dict | None:
     """Parse an intercepted request based on the host.

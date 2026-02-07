@@ -27,7 +27,7 @@ class TokenTapDashboard:
     def add_request(self, data: dict) -> None:
         """Add a new intercepted request to the dashboard."""
         tokens = data.get("tokens", 0)
-        self.total_tokens += tokens
+        self.total_tokens = tokens
 
         # Store request info
         request_info = {

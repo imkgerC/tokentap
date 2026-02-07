@@ -10,7 +10,8 @@ readme = "README.md"
 license = {text = "MIT"}
 requires-python = ">=3.10"
 authors = [
-    {name = "Juan Munoz"}
+    {name = "Juan Munoz"},
+    {name = "Erik Imgrund"}
 ]
 keywords = ["llm", "tokens", "claude", "anthropic", "openai", "gemini", "cli", "token-tracking"]
 classifiers = [

@@ -1,15 +1,14 @@
+
+# This is a fork
+
+I adapted tokentap to be able to inspect prompts send to a local model instead of the original frontier model providers.
+
+---
+
 <p align="center">
-  <h1 align="center">Tokentap (formerly Sherlock)</h1>
+  <h1 align="center">Tokentap (FORK)</h1>
   <p align="center">
     <strong>Token Tracker for LLM CLI Tools</strong>
-  </p>
-  <p align="center">
-    <img src="https://img.shields.io/badge/python-3.10+-3776AB?logo=python&logoColor=white" alt="Python">
-    <img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License">
-    <img src="https://img.shields.io/badge/platform-macOS%20%7C%20Linux-lightgrey.svg" alt="Platform">
-    <img src="https://img.shields.io/badge/Claude_Code-supported-blueviolet.svg" alt="Claude Code">
-    <img src="https://img.shields.io/badge/Gemini_CLI-supported-blue.svg" alt="Gemini">
-    <img src="https://img.shields.io/badge/Codex-supported-green.svg" alt="Codex">
   </p>
   <p align="center">
     <a href="#installation">Installation</a> •
@@ -34,14 +33,10 @@ tokentap tracks token usage for LLM CLI tools with a live terminal dashboard. Se
 ## Installation
 
 ```bash
-pip install tokentap
-```
-
-Or install from source:
-
-```bash
-git clone https://github.com/jmuncor/tokentap.git
+git clone https://github.com/imkgerC/tokentap.git
 cd tokentap
+python -m venv venv
+source venv/bin/activate
 pip install -e .
 ```
 
@@ -51,7 +46,7 @@ pip install -e .
 
 ## Quick Start
 
-### Terminal 1: Start the Dashboard
+### Step 1: Start the Dashboard
 
 ```bash
 tokentap start
@@ -75,18 +70,7 @@ You'll be prompted to choose where to save captured prompts, then the dashboard 
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### Terminal 2: Run Your LLM Tool
-
-```bash
-# For Claude Code
-tokentap claude
-
-# For Gemini CLI (see known issues)
-tokentap gemini
-
-# For OpenAI Codex
-tokentap codex
-```
+### Step 2: Run Your LLM Tool (with tokentap configured as the llm provider)
 
 That's it! Watch the dashboard update in real-time as you work.
 
@@ -118,10 +102,6 @@ Session complete. Total: 84,231 tokens across 12 requests.
 | Command | Description |
 |---------|-------------|
 | `tokentap start` | Start the proxy and dashboard |
-| `tokentap claude` | Run Claude Code with proxy configured |
-| `tokentap gemini` | Run Gemini CLI with proxy configured |
-| `tokentap codex` | Run OpenAI Codex CLI with proxy configured |
-| `tokentap run --provider <name> <cmd>` | Run any command with proxy configured |
 
 ### Options
 
@@ -154,63 +134,21 @@ Options:
                                 │ HTTP
                                 │
 ┌───────────────────────────────┴─────────────────────────────────┐
-│  Terminal 2: tokentap claude                                    │
+│  Terminal 2: your llm-powered tool                              │
 │  ┌─────────────────────────────────────────────────────────────┐│
-│  │  Sets ANTHROPIC_BASE_URL=http://localhost:8080              ││
-│  │  Runs: claude                                               ││
+│  │  Set provider url=http://localhost:8080                     ││
 │  └─────────────────────────────────────────────────────────────┘│
 └─────────────────────────────────────────────────────────────────┘
                                 │
                                 │ HTTPS
                                 ▼
                       ┌───────────────────┐
-                      │ api.anthropic.com │
+                      │ your llm provider │
                       └───────────────────┘
 ```
 
-## Supported Providers
-
-| Provider | Command | Status |
-|----------|---------|--------|
-| Anthropic (Claude Code) | `tokentap claude` | Supported |
-| Google (Gemini CLI) | `tokentap gemini` | Blocked by upstream issue |
-| OpenAI (Codex) | `tokentap codex` | Supported |
-
-## Known Issues
-
-### Gemini CLI
-
-Gemini CLI currently has a [known issue](https://github.com/google-gemini/gemini-cli/issues/15430) where it ignores custom base URLs when using OAuth authentication. tokentap's Gemini support will work automatically once the Gemini CLI team fixes this issue.
-
-## Contributing
-
-Contributions are welcome! Here's how you can help:
-
-1. **Fork** the repository
-2. **Create** a feature branch (`git checkout -b feature/amazing-feature`)
-3. **Commit** your changes (`git commit -m 'Add amazing feature'`)
-4. **Push** to the branch (`git push origin feature/amazing-feature`)
-5. **Open** a Pull Request
-
-### Development Setup
-
-```bash
-git clone https://github.com/jmuncor/tokentap.git
-cd tokentap
-python -m venv venv
-source venv/bin/activate
-pip install -e .
-```
 
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
----
-
-<p align="center">
-  <em>See what's really being sent to the LLM. Track. Learn. Optimize.</em>
-</p>
-<p align="center">
-  <a href="https://tokentap.ai">tokentap.ai</a>
-</p>
